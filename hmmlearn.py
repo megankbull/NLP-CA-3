@@ -29,7 +29,7 @@ def read_file(f_path=sys.argv[1]):
    with open(f_path, 'r') as f: 
       lines = f.readlines()
 
-   return [line.split(" ") for line in lines]
+   return [line.lower().strip().split(" ") for line in lines]
 
 def word_tuples(lines): 
    tagged_tupes = []
@@ -37,8 +37,8 @@ def word_tuples(lines):
       line_tupes = []
       for token in line: 
          tok = token.strip()
-         tag = tok.split("/")[-1].upper()
-         w = tok.removesuffix(f"/{tag}").lower()
+         tag = tok.split("/")[-1]
+         w = tok.removesuffix(f"/{tag}")
          line_tupes.append((w, tag))
       tagged_tupes.append(line_tupes)
    return tagged_tupes
@@ -119,10 +119,6 @@ def build_emission_matrix(tag_counts, word_tag_counts):
    return emission_mat   
 
 def viterbi_algo(word_seq): 
-   # need master tag list 
-   # need master vocab list 
-   # probably split into two funcs 
-   # one for testing/evaluating one for training 
    global CORPUS, TAGS, E_MAT, T_MAT, T_i
    states = []
    last_state = T_i.index('')
@@ -133,6 +129,7 @@ def viterbi_algo(word_seq):
 
       try: 
          c_i = CORPUS.index(w)
+
       except ValueError: 
          unseen = True
 
@@ -144,8 +141,9 @@ def viterbi_algo(word_seq):
 
       p_max = max(p)
       best_tag_index = p.index(p_max)
-      states.append(T_c[best_tag_index])
-      last_state = best_tag_index
+      best_state = T_c[best_tag_index]
+      states.append(best_state)
+      last_state = T_i.index(best_state)
 
    return list(zip(word_seq, states))
 
@@ -163,9 +161,6 @@ def train_model(train_set):
 
    T_MAT = build_transition_matrix(tag_bigram, tag_counts)
    E_MAT = build_emission_matrix(tag_counts, word_tag_counts)
-
-   # t_df = pd.DataFrame(T_MAT, index=TAGS, columns=T_c)
-   # print(t_df)
 
 def eval_model(test_set):
 
@@ -190,19 +185,39 @@ def eval_model(test_set):
    acc = len(check)/total
    print(f"Viterbi Algorithm Accuracy: {acc}")
 
-def write_out(tagged_seq, actual_seq, out_path=OUT_PATH): 
-   with open(out_path, 'w') as f: 
+def test_model(f_path=sys.argv[2], a_f_path=sys.argv[3]): 
 
-      for pred, actual in zip(tagged_seq, actual_seq): 
-         f.write(f"{pred[0]}\t{pred[1]}\t{actual[1]}\n")
+   lines = read_file(f_path)
+   a_tupes = word_tuples(read_file(a_f_path))
+
+   preds = [viterbi_algo(samp) for samp in lines]
+
+   check = []
+   total = 0
+
+   with open(OUT_PATH, 'w') as f: 
+      for p_line, a_line in zip(preds, a_tupes): 
+         for p_tup, a_tup in zip(p_line, a_line): 
+            if p_tup == a_tup: check.append(p_tup)
+            total +=1
+            f.write(f"{p_tup[0]}\t{p_tup[1]}\t{a_tup[1]}\n")
+
+   acc = len(check)/total
+   print(f"Viterbi Algorithm Accuracy: {acc}")
+
+# def write_out(tagged_seq, actual_seq, out_path=OUT_PATH): 
+#    with open(out_path, 'w+') as f: 
+
+#       for pred, actual in zip(tagged_seq, actual_seq): 
+#          f.write(f"{pred[0]}\t{pred[1]}\t{actual[1]}\n")
 
 def main(): 
-   lines = read_file()
-   train, test = train_test_split(lines)
+   train = word_tuples(read_file())
 
    train_model(train)
-   eval_model(train)
-
+   test_model()
+   # t_df = pd.DataFrame(T_MAT, index=TAGS, columns=T_c)
+   # print(t_df)
    return (0)
 
 if __name__ == '__main__': 
