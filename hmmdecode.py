@@ -1,8 +1,8 @@
-# python hmmlearn.py /path/to/input
-from collections import Counter
+# python hmmdecode.py /path/to/input
 import sys 
-import random 
-import math
+import json 
+import heapq
+import operator
 import numpy as np
 
 OUT_PATH = "hmmoutput.txt"
@@ -10,6 +10,7 @@ MODEL_PATH = "hmmmodel.txt"
 
 CORPUS = None
 TAGS = None
+N_UNIQ_TAG = None
 T_MAT = None
 E_MAT = None
 T_c = None
@@ -32,24 +33,26 @@ def word_tuples(lines):
       tagged_tupes.append(line_tupes)
    return tagged_tupes
 
-def viterbi_algo(word_seq): 
-   global CORPUS, TAGS, E_MAT, T_MAT, T_c
+def viterbi_algo(word_seq):
+   global CORPUS, TAGS, N_UNIQ_TAG, E_MAT, T_MAT, T_c
+   
    states = []
    last_state = TAGS.index('')
+   common_tags_p = heapq.nlargest(6, N_UNIQ_TAG.items(), key=operator.itemgetter(1))
+   common_tags = {t for t,_ in common_tags_p}
 
    for i, w in enumerate(word_seq): 
       p = []
-      unseen = False
+      unseen = False if w.lower() in set(CORPUS) else True
+      c_i = CORPUS.index(w.lower()) if not unseen else 0 
 
-      try: 
-         c_i = CORPUS.index(w.lower())
-
-      except ValueError: 
-         unseen = True
 
       for j, tag in enumerate(T_c):
+         
          e_p = 1 if unseen or i == 0 else E_MAT[c_i, j]
-         t_p = T_MAT[last_state,j]
+         
+         if unseen and tag.lower() not in common_tags: t_p = 0
+         else: t_p = T_MAT[last_state,j]
 
          p.append(e_p * t_p)
 
@@ -86,14 +89,16 @@ def clean_matrix(matr_list):
    return np.asmatrix(matr)
 
 def set_model(): 
-   global CORPUS, TAGS, E_MAT, T_MAT, T_c
+   global CORPUS, TAGS, N_UNIQ_TAG, E_MAT, T_MAT, T_c
 
    with open(MODEL_PATH, "r") as f: 
       raw_params = f.read().split("\n\n")
-      CORPUS = raw_params[0].strip().split(" ")[1:]
-      TAGS = raw_params[1].strip().split(" ")[1:]
-      e_mat = raw_params[3].strip().split(']')[:-2]
-      t_mat = raw_params[5].strip().split(']')[:-2]
+      CORPUS = raw_params[1].strip().split(" ")
+      N_UNIQ_TAG = json.loads(raw_params[3])
+      TAGS = json.loads(raw_params[5])
+
+      e_mat = raw_params[7].strip().split(']')[:-2]
+      t_mat = raw_params[9].strip().split(']')[:-2]
    
    T_c = TAGS.copy()
    T_c.remove('')
