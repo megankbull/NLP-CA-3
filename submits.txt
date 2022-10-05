@@ -1,3 +1,25 @@
+Submit 47: (suffixes of length 1)
+   Results for Italian:                                                                                                 
+   Correct: 10580                                                                                                       
+   Total: 11908                                                                                                         
+   Accuracy: 0.8884783338931811                                                                                         
+                                                                            
+   Results for Japanese:                                                                                                
+   Correct: 10190                                                                                                       
+   Total: 11491                                                                                                         
+   Accuracy: 0.8867809590114002 
+
+Submit 45: (suffixes of length 2) 
+   Results for Italian:
+   Correct: 10620
+   Total: 11908
+   Accuracy: 0.8918374202216997
+
+   Results for Japanese:
+   Correct: 9853
+   Total: 11491
+   Accuracy: 0.8574536593856061
+
 Submit 44: 
    Results for Italian:
    Correct: 10615

@@ -50,7 +50,7 @@ def get_tag_counts():
    for line in line_tuples: 
       prev_tag = ''
       for word, tag in line: 
-         suff = word[-3:] if len(word) > 3 else ''
+         suff = word[-1:] # if len(word) > 2 else ''
 
          if prev_tag == '': tag_counts[''].append(word)
          if tag not in tag_counts.keys(): tag_counts[tag] = []
@@ -103,6 +103,8 @@ def train_model():
 
    tag_bigram, tag_counts, word_tag_counts, SUFF_TAG_COUNTS = get_tag_counts()
    
+   #del SUFF_TAG_COUNTS['']
+
    CORPUS = list(set(word_tag_counts.keys()))
    N_UNIQ_TAG = {k:len(set(v)) for k,v in tag_counts.items()}
    TAGS = list(set(N_UNIQ_TAG.keys()))

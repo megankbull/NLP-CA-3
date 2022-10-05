@@ -48,9 +48,8 @@ def get_closest_index(word, last_state, prev_p):
 
    except ValueError: 
       indices = [i for i, vocab_w in enumerate(CORPUS) if word.lower() == vocab_w.lower()]
-      
-      cur_p = np.Inf
-      
+      cur_p = 0
+
       for loc in indices: 
          s = []
          for j in range(len(T_c)): 
@@ -62,22 +61,22 @@ def get_closest_index(word, last_state, prev_p):
 
          if state_p > cur_p: 
             cur_p = state_p 
-            best_tag = T_c[s.index(state_p)]
-            
+            best_tag = T_c[s.index(cur_p)]
+
       return best_tag, cur_p
 
 def suffix_tag_p(word, tag):
    global SUFF_TAGS
 
-   if len(word) < 3: return 1
+#   if len(word) < 2: return 1
 
-   if word[-3:] not in SUFF_TAGS.keys(): return 0
-   if tag not in SUFF_TAGS[word[-3:]].keys(): return 0
+   if word[-1:] not in SUFF_TAGS.keys(): return 0
+   if tag not in SUFF_TAGS[word[-1:]].keys(): return 0
 
-   return SUFF_TAGS[word[-3:]][tag] / sum(SUFF_TAGS[word[-3:]].values())
+   return SUFF_TAGS[word[-1:]][tag] / sum(SUFF_TAGS[word[-1:]].values())
 
 def viterbi_algo(word_seq):
-   global TAGS, E_MAT, T_MAT, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS
+   global CORPUS, TAGS, N_UNIQ_TAG, E_MAT, T_MAT, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS
 
    states = []
    last_state = TAGS.index('')
@@ -87,7 +86,7 @@ def viterbi_algo(word_seq):
       p = []
       unseen = w not in SET_CORP and w.lower() not in LOWER_CORP
       c_i = 0 if unseen else get_closest_index(w, last_state, prev_p)
-
+      
       if type(c_i) is tuple: 
          states.append(c_i[0])
          last_state = TAGS.index(c_i[0])
@@ -101,8 +100,8 @@ def viterbi_algo(word_seq):
 
          p.append(e_p * t_p * prev_p * suff_p)
 
-      prev_p = max(p)
-      best_state = T_c[p.index(prev_p)]
+      p_max = max(p)
+      best_state = T_c[p.index(p_max)]
       states.append(best_state)
       last_state = TAGS.index(best_state)
 
