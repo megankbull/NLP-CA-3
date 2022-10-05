@@ -1,8 +1,6 @@
 # python hmmdecode.py /path/to/input
 import sys 
 import json 
-import heapq
-import operator
 import numpy as np
 
 OUT_PATH = "hmmoutput.txt"
@@ -10,7 +8,6 @@ MODEL_PATH = "hmmmodel.txt"
 
 CORPUS = None
 TAGS = None
-N_UNIQ_TAG = None
 T_MAT = None
 E_MAT = None
 T_c = None
@@ -68,15 +65,13 @@ def get_closest_index(word, last_state, prev_p):
 def suffix_tag_p(word, tag):
    global SUFF_TAGS
 
-#   if len(word) < 2: return 1
-
-   if word[-1:] not in SUFF_TAGS.keys(): return 0
+   if word[-1:] not in SUFF_TAGS.keys(): return 1
    if tag not in SUFF_TAGS[word[-1:]].keys(): return 0
 
    return SUFF_TAGS[word[-1:]][tag] / sum(SUFF_TAGS[word[-1:]].values())
 
 def viterbi_algo(word_seq):
-   global CORPUS, TAGS, N_UNIQ_TAG, E_MAT, T_MAT, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS
+   global CORPUS, TAGS, E_MAT, T_MAT, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS
 
    states = []
    last_state = TAGS.index('')
@@ -95,7 +90,7 @@ def viterbi_algo(word_seq):
 
       for j, tag in enumerate(T_c):
          suff_p = suffix_tag_p(w, tag) if unseen else 1
-         e_p = 1 if unseen or i == 0 else E_MAT[c_i, j]
+         e_p = 1 if unseen else E_MAT[c_i, j]
          t_p = 0 if unseen and tag not in COMMON_TAGS else T_MAT[last_state, j]
 
          p.append(e_p * t_p * prev_p * suff_p)
@@ -132,13 +127,13 @@ def clean_matrix(matr_list):
    return np.asmatrix(matr)
 
 def set_model(): 
-   global CORPUS, TAGS, N_UNIQ_TAG, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS, SUFF_TAGS, E_MAT, T_MAT
+   global CORPUS, TAGS, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS, SUFF_TAGS, E_MAT, T_MAT
 
    with open(MODEL_PATH, "r") as f: 
       raw_params = f.read().split("\n\n")
       CORPUS = raw_params[1].strip().split(" ")
       SUFF_TAGS = json.loads(raw_params[3])
-      N_UNIQ_TAG = json.loads(raw_params[5])
+      COMMON_TAGS = set(raw_params[5].strip().split(" "))
       TAGS = json.loads(raw_params[7])
 
       e_mat = raw_params[9].strip().split(']')[:-2]
@@ -152,9 +147,6 @@ def set_model():
 
    LOWER_CORP = {w.lower() for w in CORPUS}
    SET_CORP = set(CORPUS)
-
-   common_tags_p = heapq.nlargest(6, N_UNIQ_TAG.items(), key=operator.itemgetter(1))
-   COMMON_TAGS = {t for t,_ in common_tags_p}
 
 def main(): 
 

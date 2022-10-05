@@ -1,4 +1,6 @@
 # python hmmlearn.py /path/to/input
+import heapq
+import operator
 import sys 
 import json
 import numpy as np
@@ -10,7 +12,7 @@ OUT_PATH = "hmmmodel.txt"
 # - choose tag with highest future state probability based on 
 
 CORPUS = None
-N_UNIQ_TAG = None
+COMMON_TAGS = None
 TAGS = None
 T_MAT = None
 E_MAT = None
@@ -50,7 +52,7 @@ def get_tag_counts():
    for line in line_tuples: 
       prev_tag = ''
       for word, tag in line: 
-         suff = word[-1:] # if len(word) > 2 else ''
+         suff = word[-1:]
 
          if prev_tag == '': tag_counts[''].append(word)
          if tag not in tag_counts.keys(): tag_counts[tag] = []
@@ -99,26 +101,27 @@ def build_emission_matrix(tag_counts, word_tag_counts):
          E_MAT[i, j] = t_count / len(tag_counts[tag])
    
 def train_model():
-   global CORPUS, TAGS, N_UNIQ_TAG, T_c, SUFF_TAG_COUNTS
+   global CORPUS, TAGS, T_c, SUFF_TAG_COUNTS, COMMON_TAGS
 
    tag_bigram, tag_counts, word_tag_counts, SUFF_TAG_COUNTS = get_tag_counts()
    
-   #del SUFF_TAG_COUNTS['']
-
    CORPUS = list(set(word_tag_counts.keys()))
-   N_UNIQ_TAG = {k:len(set(v)) for k,v in tag_counts.items()}
-   TAGS = list(set(N_UNIQ_TAG.keys()))
+   n_uniq_tag = {k:len(set(v)) for k,v in tag_counts.items()}
+   TAGS = list(set(n_uniq_tag.keys()))
+
    T_c = TAGS.copy()
    T_c.remove('')
-
+   common_tags_p = heapq.nlargest(6, n_uniq_tag.items(), key=operator.itemgetter(1))
+   COMMON_TAGS = {t for t,_ in common_tags_p}
+   
    build_transition_matrix(tag_bigram, tag_counts)
    build_emission_matrix(tag_counts, word_tag_counts)
 
 def save_model(): 
-   global CORPUS, TAGS, N_UNIQ_TAG, SUFF_TAG_COUNTS, E_MAT, T_MAT 
+   global CORPUS, TAGS, COMMON_TAGS, SUFF_TAG_COUNTS, E_MAT, T_MAT 
 
    vocab = " ".join(CORPUS)
-
+   c_tags = " ".join(list(COMMON_TAGS))
    np.set_printoptions(threshold=sys.maxsize)
    e_mat_str = np.array2string(E_MAT)
    t_mat_str = np.array2string(T_MAT)
@@ -127,7 +130,7 @@ def save_model():
       f.write(f"corpus:\n\n{vocab}\n\n")
       f.write(f"possible tags given suffix:\n\n{json.dumps(SUFF_TAG_COUNTS)}\n\n")
 
-      f.write(f"tags:\n\n{json.dumps(N_UNIQ_TAG)}\n\n")
+      f.write(f"common tags:\n\n{c_tags}\n\n")
       f.write(f"matrix tag order:\n\n{json.dumps(TAGS)}\n\n")
 
       f.write(f"Emission Matrix (dimensions: words x tags)\n\n{e_mat_str}\n\n")
