@@ -1,0 +1,88 @@
+Submit 44: 
+   Results for Italian:
+   Correct: 10615
+   Total: 11908
+   Accuracy: 0.8914175344306349
+
+   Results for Japanese:
+   Correct: 9737
+   Total: 11491
+   Accuracy: 0.8473588025411192
+
+Submit 38:
+   Results for Italian:
+   Correct: 10616
+   Total: 11908
+   Accuracy: 0.8915015115888478
+
+   Results for Japanese:
+   Correct: 9698
+   Total: 11491
+   Accuracy: 0.8439648420503002
+
+Submit 37: 
+
+   Results for Italian:
+   Correct: 10622
+   Total: 11908
+   Accuracy: 0.8920053745381257
+
+   Results for Japanese:
+   Correct: 9843
+   Total: 11491
+   Accuracy: 0.856583413105909
+
+Submit 36: 
+   Results for Italian:
+   Correct: 10618
+   Total: 11908
+   Accuracy: 0.8916694659052737
+
+   Results for Japanese:
+   Correct: 9863
+   Total: 11491
+   Accuracy: 0.8583239056653033
+
+Submit 34: 
+   Results for Italian:
+   Correct: 10506
+   Total: 11908
+   Accuracy: 0.8822640241854216
+
+   Results for Japanese:
+   Correct: 10015
+   Total: 11491
+   Accuracy: 0.8715516491167
+
+Submit 35: 
+   Results for Italian:
+   Correct: 10492
+   Total: 11908
+   Accuracy: 0.88108834397044
+
+   Results for Japanese:
+   Correct: 10017
+   Total: 11491
+   Accuracy: 0.8717256983726395
+
+Submit 33: 
+   Results for Italian:
+   Correct: 10508
+   Total: 11908
+   Accuracy: 0.8824319785018475
+
+   Results for Japanese:
+   Correct: 10015
+   Total: 11491
+   Accuracy: 0.8715516491167
+
+Submit 26/28:
+   Results for Italian:
+   Correct: 10526
+   Total: 11908
+   Accuracy: 0.8839435673496809
+
+   Results for Japanese:
+   Correct: 10015
+   Total: 11491
+   Accuracy: 0.8715516491167

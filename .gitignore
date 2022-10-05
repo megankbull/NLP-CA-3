@@ -1,2 +1,3 @@
 hmm-training-data/*
-hw3-hmm.pdf
+*.pdf
+.DS_Store
