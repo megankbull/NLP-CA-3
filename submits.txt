@@ -1,17 +1,35 @@
-Italian: 
-   Baseline: 0.89385 
-   Reference: 0.94239
-Japanese: 
-   Baseline: 0.86268 
-   Reference: 0.91889
+Italian: Baseline: 0.89385 Reference: 0.94239
+Japanese: Baseline: 0.86268 Reference: 0.91889
 
-Submit 50/53: 
+Submit 99: 
    Results for Italian:
-   Correct: 10977
+   Correct: 10991
    Total: 11908
-   Accuracy: 0.9218172657037286
+   Accuracy: 0.9229929459187101
 
    Results for Japanese:
-   Correct: 10498
+   Correct: 10493
    Total: 11491
-   Accuracy: 0.9135845444260726
+   Accuracy: 0.913149421286224
+
+Submit 111: (same as 110&99): 
+   Results for Italian:
+   Correct: 10988
+   Total: 11908
+   Accuracy: 0.9227410144440712
+
+   Results for Japanese:
+   Correct: 10492
+   Total: 11491
+   Accuracy: 0.9130623966582543
+
+Submit 106: (smoothing of T_MAT: bi_count + 1/ len(tag_count[tag1]))
+   Results for Italian:
+   Correct: 10987
+   Total: 11908
+   Accuracy: 0.9226570372858582
+
+   Results for Japanese:
+   Correct: 10497
+   Total: 11491
+   Accuracy: 0.9134975197981029

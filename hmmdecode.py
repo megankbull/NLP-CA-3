@@ -20,25 +20,9 @@ def read_file(f_path=sys.argv[1]):
    with open(f_path, 'r') as f: 
       return [l.strip().split(" ") for l in f.readlines()]
 
-def word_tuples(lines): 
-   
-   tagged_tupes = []
-
-   for line in lines: 
-      line_tupes = []
-      for token in line: 
-         tok = token.strip()
-         tag = tok.split("/")[-1]
-
-         w = tok.replace(f"/{tag}", '')
-         line_tupes.append((w, tag))
-
-      tagged_tupes.append(line_tupes)
-
-   return tagged_tupes
-
-def get_closest_index(word, last_state, prev_p): 
+def get_closest_index(word, last_state, prev_p, last_word=False): 
    global CORPUS, T_c, E_MAT, T_MAT
+   boundary = T_c.index('/')
 
    try:
       return CORPUS.index(word)
@@ -49,10 +33,15 @@ def get_closest_index(word, last_state, prev_p):
 
       for loc in indices: 
          s = []
-         for j in range(len(T_c)): 
+         for j, tag in enumerate(T_c): 
+            if tag == '/': 
+               s.append(0)
+               continue
             e_p = E_MAT[loc, j]
             t_p = T_MAT[last_state, j] 
-            s.append(e_p * t_p * prev_p)
+            last_tag_p = T_MAT[j, boundary] * 0.05 if last_word else 1
+
+            s.append(e_p * t_p * prev_p * last_tag_p)
 
          state_p = max(s) 
 
@@ -74,14 +63,17 @@ def viterbi_algo(word_seq):
    global CORPUS, TAGS, E_MAT, T_MAT, T_c, LOWER_CORP, SET_CORP, COMMON_TAGS
 
    states = []
-   last_state = TAGS.index('')
+   last_state = TAGS.index('\\')
+   boundary = T_c.index('/')
    prev_p = 1
 
    for i, w in enumerate(word_seq): 
       p = []
+      last_word = i ==len(word_seq) - 2
+
       unseen = w not in SET_CORP and w.lower() not in LOWER_CORP
-      c_i = 0 if unseen else get_closest_index(w, last_state, prev_p)
-      
+      c_i = 0 if unseen else get_closest_index(w, last_state, prev_p, last_word)
+
       if type(c_i) is tuple: 
          states.append(c_i[0])
          last_state = TAGS.index(c_i[0])
@@ -89,11 +81,16 @@ def viterbi_algo(word_seq):
          continue 
 
       for j, tag in enumerate(T_c):
+         if tag == '/': 
+            p.append(0)
+            continue
+
          suff_p = suffix_tag_p(w, tag) if unseen else 1
          e_p = 1 if unseen else E_MAT[c_i, j]
          t_p = 0 if unseen and tag not in COMMON_TAGS else T_MAT[last_state, j]
+         last_tag_p = T_MAT[j, boundary] * 0.05 if last_word else 1
 
-         p.append(e_p * t_p * prev_p * suff_p)
+         p.append(e_p * t_p * prev_p * suff_p * last_tag_p)
 
       p_max = max(p)
       best_state = T_c[p.index(p_max)]
@@ -140,7 +137,7 @@ def set_model():
       t_mat = raw_params[11].strip().split(']')[:-2]
    
    T_c = TAGS.copy()
-   T_c.remove('')
+   T_c.remove('\\')
 
    E_MAT = clean_matrix(e_mat)
    T_MAT = clean_matrix(t_mat)
